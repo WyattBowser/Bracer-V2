@@ -176,9 +176,10 @@ void BracerControlPanel::sendJetpackObject() {
     }
   } 
   
+  /*
   if (jetpack.getState() == JETPACK_STATE::STOP) {
     jetpack.setState(JETPACK_STATE::READY);
-  }
+  }*/
   
   if (jetpack.getState() != last_jetpack_state) {
     Serial.println("State changed");
@@ -190,7 +191,18 @@ void BracerControlPanel::sendJetpackObject() {
       }
     }
 
-    byte data[1] = {(uint8_t)jetpack.getState()};
+    uint8_t mode;
+    switch (jetpack.getState())
+    {
+      case JETPACK_STATE::LAUNCH:
+        mode = 0;
+        break;
+      case JETPACK_STATE::STOP:
+        mode = 2;
+        jetpack.setState(JETPACK_STATE::READY);
+        break;
+    }
+    byte data[1] = {mode};
 
     bluetooth_.sendDataTo(JETPACK_NAME, data, 1);
     last_jetpack_state = jetpack.getState();
