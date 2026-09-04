@@ -22,7 +22,7 @@ Peripheral Peripheral::createPeripheral(BLEDevice device_) {
       Serial.print("\t");
       Serial.println(device_.characteristic(i).uuid());
     }
-    BLECharacteristic characteristic_ = device_.characteristic("6969");
+    BLECharacteristic characteristic_ = device_.characteristic(JETPACK_CONTROL_UUID);
     if (!characteristic_) {
       Serial.println("This device does not have the correct characteristic!");
       return Peripheral();
