@@ -73,6 +73,15 @@ bool BtBridge::isPeripheralConnected(String name) {
   return false;
 }
 
+Peripheral BtBridge::getPeripheral(String name) {
+  for(int i = 0; i < PERIPHERAL_COUNT; i++) {
+    if(peripherals[i].name == name) {
+      return peripherals[i];
+    }
+  }
+  return Peripheral();
+}
+
 void BtBridge::removePeripheral(String name) {
     for(int i = 0; i < PERIPHERAL_COUNT; i++) {
     if(peripherals[i].name == name) {
@@ -95,7 +104,10 @@ void BtBridge::sendDataTo(String name, byte* data, size_t length) {
         Serial.print(" ");
       }
       Serial.println();
-      peripherals[i].characteristic.writeValue(data, length);
+      bool write_ok = peripherals[i].characteristic.writeValue(data, length);
+      Serial.print("Wrote to characteristic ");
+      Serial.print(peripherals[i].characteristic.uuid());
+      Serial.println(write_ok ? ": success" : ": FAILED");
     }
   }
 }

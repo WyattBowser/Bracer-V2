@@ -148,6 +148,7 @@ void BracerControlPanel::setupJetpack() {
     jetpack.setStatus(JetpackStatus::DISCONNECTED);
     return;
   }
+  jetpack_peripheral_.attach(bluetooth_.getPeripheral(JETPACK_LOCAL_NAME).device);
   jetpack.setStatus(JetpackStatus::STATE);
 }
 
@@ -156,13 +157,18 @@ void BracerControlPanel::updateJetpackObject() {
     if(!bluetooth_.isPeripheralConnected(JETPACK_LOCAL_NAME)) {
     if(!bluetooth_.connectToPeripheral(JETPACK_LOCAL_NAME)) {
       jetpack.setStatus(JetpackStatus::DISCONNECTED);
+      jetpack_peripheral_.detach();
       return;
     } else {
+      jetpack_peripheral_.attach(bluetooth_.getPeripheral(JETPACK_LOCAL_NAME).device);
       jetpack.setStatus(JetpackStatus::STATE);
     }
   } else {
     jetpack.setStatus(JetpackStatus::STATE);
   }
+
+  jetpack_peripheral_.update();
+  jetpack.setState(jetpack_peripheral_.getState());
 
   if (big_button.isPushed()) {
     byte command = 0;

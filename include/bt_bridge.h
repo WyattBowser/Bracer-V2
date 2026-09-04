@@ -25,6 +25,7 @@ public:
   bool connectToPeripheral(String name);
   bool isPeripheralConnected(String name);
   void removePeripheral(String name);
+  Peripheral getPeripheral(String name);
 
   void sendDataTo(String name, byte* data, size_t length);
   byte getDataFrom(String name);

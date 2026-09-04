@@ -7,6 +7,7 @@
 #include "helmet.h"
 #include "bt_bridge.h"
 #include "jetpack.h"
+#include "jetpack_peripheral.h"
 #include "jetpack_deps/bluetooth.h"
 
 
@@ -68,6 +69,7 @@ private:
 
   //States
   Jetpack jetpack;
+  JetpackPeripheral jetpack_peripheral_;
   JetpackState last_jetpack_state = JetpackState::DISARMED;
 
   Helmet helmet;
