@@ -128,7 +128,7 @@ void BracerControlPanel::updateScreen() {
       screen_.updateRectangle(blue_rect_, helmet.getRGB("blue"));
       screen_.updateRectangle(helmet_status_rect_, helmet.translateHelmetStatus());
       screen_.updateRectangle(helmet_mode_rect_, helmet.translateHelmetMode());
-      screen_.updateRectangle(jetpack_status_rect_, jetpack.stateToString());
+      screen_.updateRectangle(jetpack_status_rect_, jetpack.getStatus());
       break;
     case Background::QR:
       break;
@@ -143,70 +143,44 @@ String BracerControlPanel::stringify(){
 }
 
 void BracerControlPanel::setupJetpack() {
-  jetpack.setState(JETPACK_STATE::CONNECTING);
-  if (!bluetooth_.connectToPeripheral(JETPACK_NAME)) {
-    jetpack.setState(JETPACK_STATE::DISCONNECTED);
+  jetpack.setStatus(JetpackStatus::CONNECTING);
+  if (!bluetooth_.connectToPeripheral(JETPACK_LOCAL_NAME)) {
+    jetpack.setStatus(JetpackStatus::DISCONNECTED);
     return;
   }
-  jetpack.setState(JETPACK_STATE::READY);
+  jetpack.setStatus(JetpackStatus::STATE);
 }
 
 void BracerControlPanel::updateJetpackObject() {
-  if (big_button.isPushed()) {
-    switch (jetpack.getState()) {
-      case JETPACK_STATE::LAUNCH:
-        jetpack.setState(JETPACK_STATE::STOP);
-        break;
-      case JETPACK_STATE::READY:
-        jetpack.setState(JETPACK_STATE::LAUNCH);
-        break;
-    } 
-  }
-  sendJetpackObject();
-}
 
-void BracerControlPanel::sendJetpackObject() {
-  if(!bluetooth_.isPeripheralConnected(JETPACK_NAME)) {
-    if(!bluetooth_.connectToPeripheral(JETPACK_NAME)) {
-      jetpack.setState(JETPACK_STATE::DISCONNECTED);
-      last_jetpack_state = jetpack.getState();
+    if(!bluetooth_.isPeripheralConnected(JETPACK_LOCAL_NAME)) {
+    if(!bluetooth_.connectToPeripheral(JETPACK_LOCAL_NAME)) {
+      jetpack.setStatus(JetpackStatus::DISCONNECTED);
       return;
     } else {
-      jetpack.setState(JETPACK_STATE::STOP);
+      jetpack.setStatus(JetpackStatus::STATE);
     }
-  } 
-  
-  /*
-  if (jetpack.getState() == JETPACK_STATE::STOP) {
-    jetpack.setState(JETPACK_STATE::READY);
-  }*/
-  
-  if (jetpack.getState() != last_jetpack_state) {
-    Serial.println("State changed");
-    if (!bluetooth_.isPeripheralConnected(JETPACK_NAME)) {
-      bluetooth_.removePeripheral(JETPACK_NAME);
-      if(!bluetooth_.connectToPeripheral(JETPACK_NAME)) {
-        jetpack.setState(JETPACK_STATE::DISCONNECTED);
+  } else {
+    jetpack.setStatus(JetpackStatus::STATE);
+  }
+
+  if (big_button.isPushed()) {
+    byte command = 0;
+    switch (jetpack.getState()) {
+      case JetpackState::DISARMED:
+        command = static_cast<byte>(JetpackCommand::FULL_CYCLE);
+        break;
+      case JetpackState::SPOOLING_UP:
+      case JetpackState::ARMED:
+        command = static_cast<byte>(JetpackCommand::SPOOL_DOWN);
+        break;
+      case JetpackState::SPOOLING_DOWN:
+        command = static_cast<byte>(JetpackCommand::STOP);
+        break;
+      default:
         return;
-      }
     }
-
-    uint8_t mode;
-    switch (jetpack.getState())
-    {
-      case JETPACK_STATE::LAUNCH:
-        mode = 0;
-        break;
-      case JETPACK_STATE::STOP:
-        mode = 2;
-        jetpack.setState(JETPACK_STATE::READY);
-        break;
-    }
-    byte data[1] = {mode};
-
-    bluetooth_.sendDataTo(JETPACK_NAME, data, 1);
-    last_jetpack_state = jetpack.getState();
-    
+    bluetooth_.sendDataTo(JETPACK_LOCAL_NAME, &command, 1); 
   }
 }
 

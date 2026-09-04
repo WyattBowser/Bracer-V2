@@ -1,27 +1,36 @@
 #pragma once
 #include <Arduino.h>
+#include "jetpack_deps/common.h"
 
-
-enum class JETPACK_STATE {
-  LAUNCH,
-  STOP,
-  DONE,
-  TEST_FOG,
-  TEST_SOUND,
-  TEST_LIGHTS,
-  READY,
+enum JetpackStatus {
+  CONNECTING,
   DISCONNECTED,
-  CONNECTING
+  STATE
 };
 
 class Jetpack {
 public:
-  Jetpack();
-  String stateToString();
-  JETPACK_STATE getState() { return current_state; }
-  int8_t getStateAsInt8() { return (int8_t)current_state; }
-  void setState(JETPACK_STATE cmd) { current_state = cmd; }
+  Jetpack(){};
+  JetpackState getState() { return current_state; }
+  void setState(JetpackState state) { current_state = state; }
+
+  String getStatus() { 
+    if (current_status == STATE) {
+      return toString(current_state);
+    } else {
+      if (current_status == DISCONNECTED) {
+        return "D/C";
+      }
+      if (current_status == CONNECTING) {
+        return "CONN...";
+      }
+    }
+  }
+
+  JetpackStatus getCurrentStatus() { return current_status; }
+  void setStatus(JetpackStatus status) { current_status = status; }
 
 private:
-  JETPACK_STATE current_state;
+  JetpackState current_state = JetpackState::DISARMED;
+  JetpackStatus current_status = DISCONNECTED;
 };

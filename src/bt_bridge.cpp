@@ -88,7 +88,7 @@ void BtBridge::sendDataTo(String name, byte* data, size_t length) {
   Serial.println(name);
   printPeripherals();
   for(int i = 0 ; i < PERIPHERAL_COUNT; i++) {
-    if(peripherals[i].name == name) {
+    if(peripherals[i].name == name && isPeripheralConnected(name)) {
       Serial.print("Found peripheral, sending Data: ");
       for (int i = 0; i < length; i++) {
         Serial.print(data[i]);

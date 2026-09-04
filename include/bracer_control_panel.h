@@ -7,6 +7,7 @@
 #include "helmet.h"
 #include "bt_bridge.h"
 #include "jetpack.h"
+#include "jetpack_deps/bluetooth.h"
 
 
 class BracerControlPanel {
@@ -35,8 +36,6 @@ public:
   //Jetpack Stuff
   void setupJetpack();
   void updateJetpackObject();
-  void sendJetpackObject();
-  String jetpackCmdToString(JETPACK_STATE cmd);
   
 private:
 
@@ -69,9 +68,7 @@ private:
 
   //States
   Jetpack jetpack;
-  JETPACK_STATE last_jetpack_state = JETPACK_STATE::DISCONNECTED;
-  String JETPACK_NAME = "Hijack Jetpack";
-  String JETPACK_CHAR = "Jetpack Control";
+  JetpackState last_jetpack_state = JetpackState::DISARMED;
 
   Helmet helmet;
   HelmetState last_helmet_mode = HelmetState::DISCONNECTED;
